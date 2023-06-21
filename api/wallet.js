@@ -8,7 +8,6 @@ export async function postWalletToBlockCypher(name, wallet) {
         extended_public_key: wallet.extendedPublicKey,
         mnemonic: wallet.mnemonic,
     };
-
     try {
         const response = await axios.post(url, data);
         response.data.mnemonic = wallet.mnemonic
