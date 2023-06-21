@@ -3,6 +3,8 @@ import { networks } from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import { postWalletToBlockCypher } from '../api/index.js';
+// TODO: next thing to work on is the address creation while making a wallet
+// and adding addresses to a wallet by tonight 
 
 const bip32 = BIP32Factory(ecc)
 

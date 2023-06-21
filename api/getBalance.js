@@ -1,5 +1,4 @@
 import axios from "axios";
-const token = process.env.TOKEN;
 
 export default async function getBalance(addrs) {
     let balance = 0;
