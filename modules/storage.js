@@ -18,7 +18,7 @@ export function writeData(data) {
 
 export function createFile() {
   if (!existsSync(dbPath)) {
-    const initialData = {};
+    const initialData = [];
     writeData(initialData);
   }
 }
