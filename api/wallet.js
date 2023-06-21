@@ -14,6 +14,16 @@ export async function postWalletToBlockCypher(name, wallet) {
         response.data.mnemonic = wallet.mnemonic
         return response.data;
     } catch (error) {
-        console.error('Error importing HD wallet:', error.response.data);
+        console.error('Error importing wallet:', error.response.data);
+    }
+}
+
+export async function listAllWallets() {
+    const url = `https://api.blockcypher.com/v1/btc/test3/wallets?token=${token}`;
+    try {
+        const response = await axios.get(url);
+        return response.data.wallet_names;
+    } catch (error) {
+        console.error('Error fetching balance: ', error.response.data)
     }
 }

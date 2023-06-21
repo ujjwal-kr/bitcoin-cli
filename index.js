@@ -1,9 +1,10 @@
 import 'dotenv/config'
 import { createWallet } from './modules/wallet.js'
+import { listAllWallets } from './api/wallet.js'
 
 async function main() {
-    const wallet =  await createWallet("bruhh")
-    console.log(wallet)
+   const wallets = await listAllWallets()
+   console.log(wallets) 
 }
 
 main()
