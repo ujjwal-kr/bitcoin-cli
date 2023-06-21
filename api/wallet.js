@@ -26,3 +26,13 @@ export async function listAllWallets() {
         console.error('Error fetching balance: ', error.response.data)
     }
 }
+
+export async function addAddressesToBlockCypher(name, addrs) {
+    const data = JSON.stringify({"addresses":addrs});
+    const url = `https://api.blockcypher.com/v1/btc/main/wallets/${name}/addresses?token=${token}`;
+    try {
+        const response = await axios.post(url, data);
+    } catch (error) {
+        console.error("Error in adding addresses to wallet: ", error.response.data)
+    }
+}
