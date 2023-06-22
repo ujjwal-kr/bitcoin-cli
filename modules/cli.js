@@ -9,15 +9,15 @@ export function initializeCli() {
     program
         .command('create <name>')
         .description('Create a new wallet by name')
-        .action((name) => {
-            createWallet(name)
+        .action(async (name) => {
+            await createWallet(name)
         })
 
     program
         .command('generate <name> <count>')
         .description('Generate new addresses for the given wallet name')
-        .action((name, count) => {
-            addAddressesToWallet(name, count)
+        .action(async (name, count) => {
+            await addAddressesToWallet(name, count)
         })
 
     program
