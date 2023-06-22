@@ -2,9 +2,8 @@ import { generateMnemonic as _generateMnemonic, mnemonicToSeedSync } from 'bip39
 import { networks } from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
-import { addAddresses, postWallet } from '../api/index.js';
+import { addAddresses, getTransactions, postWallet } from '../api/index.js';
 import { readData, writeData } from "../modules/storage.js";
-// TODO: next thing to work on is the address creation while making a wallet
 
 const bip32 = BIP32Factory(ecc)
 
@@ -105,4 +104,14 @@ export async function addAddressesToWallet(name, numAddresses) {
     wallet.addresses.push(...addresses);
     await addAddresses(name, addresses);
     updateLocalWallet(name, wallet);
+}
+
+export async function getTransactionsFromWallet(name) {
+    const wallet = getLocalWallet(name);
+    let transactions = [];
+    for (let i in wallet.addresses) {
+        const txs = await getTransactions(wallet.addresses[i]);
+        transactions.push(txs);
+    }
+    return transactions;
 }
