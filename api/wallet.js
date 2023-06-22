@@ -10,7 +10,8 @@ export async function postWallet(name, wallet) {
     };
     try {
         const response = await axios.post(url, data);
-        response.data.mnemonic = wallet.mnemonic
+        response.data.latestIndex = wallet.latestIndex
+        response.data.addresses = [];
         return response.data;
     } catch (error) {
         console.error('Error importing wallet:', error.response.data);
