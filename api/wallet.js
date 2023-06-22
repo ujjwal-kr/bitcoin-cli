@@ -12,6 +12,8 @@ export async function postWallet(name, wallet) {
         const response = await axios.post(url, data);
         response.data.latestIndex = wallet.latestIndex
         response.data.addresses = [];
+        delete response.data.token;
+        delete response.data.chains;
         return response.data;
     } catch (error) {
         console.error('Error importing wallet:', error.response.data);

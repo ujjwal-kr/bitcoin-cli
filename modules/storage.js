@@ -7,7 +7,7 @@ export function readData() {
     const data = readFileSync(dbPath, 'utf8');
     return JSON.parse(data);
   } catch (err) {
-    return {};
+    return [];
   }
 }
 

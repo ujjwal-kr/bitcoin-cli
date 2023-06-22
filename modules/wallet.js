@@ -4,6 +4,7 @@ import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import { addAddresses, getTransactions, postWallet } from '../api/index.js';
 import { readData, writeData } from "../modules/storage.js";
+import getBalance from '../api/getBalance.js';
 
 const bip32 = BIP32Factory(ecc)
 
@@ -39,7 +40,7 @@ function getLocalWallet(name) {
             return dbData[i]
         }
     }
-    console.error("Wallet not found by the name: ", name);
+    throw Error('Wallet not found by name ' + name);
 }
 
 function updateLocalWallet(name, newWallet) {
@@ -55,7 +56,7 @@ function updateLocalWallet(name, newWallet) {
     if (found) {
         writeData(dbData)
     } else {
-        console.error("Wallet not found by the name: ", name);
+        throw Error("Wallet not found by name: " + name);
     }
 }
 
@@ -89,29 +90,51 @@ export async function importWalletFromMnemonic(name, mnemonic) {
 }
 
 export function listLocalWallets() {
-    const wallets = JSON.parse(readData());
-    return wallets;
+    const wallets = readData();
+    if (wallets.length == 0) {
+        throw Error("No wallets found in storage")
+    } else {
+        return wallets;
+    }
 }
 
 export async function addAddressesToWallet(name, numAddresses) {
-    let wallet = getLocalWallet(name);
-    const addresses = [];
-    const extendedPublicKey = wallet.extendedPublicKey;
-    for (let i = 0; i < numAddresses; i++) {
-        const address = deriveBIP44Address(extendedPublicKey, i + wallet.latestIndex);
-        addresses.push(address);
+    try {
+        let wallet = getLocalWallet(name);
+        const addresses = [];
+        const extendedPublicKey = wallet.extendedPublicKey;
+        if (numAddresses <= 0 ) throw Error("Number of addresses cannot be negative or 0"); 
+        for (let i = 0; i < numAddresses; i++) {
+            const address = deriveBIP44Address(extendedPublicKey, i + wallet.latestIndex);
+            addresses.push(address);
+        }
+        wallet.addresses.push(...addresses);
+        await addAddresses(name, addresses);
+        updateLocalWallet(name, wallet);
+    } catch (error) {
+        throw Error(error.message);
     }
-    wallet.addresses.push(...addresses);
-    await addAddresses(name, addresses);
-    updateLocalWallet(name, wallet);
 }
 
 export async function getTransactionsFromWallet(name) {
-    const wallet = getLocalWallet(name);
-    let transactions = [];
-    for (let i in wallet.addresses) {
-        const txs = await getTransactions(wallet.addresses[i]);
-        transactions.push(txs);
+    try {
+        const wallet = getLocalWallet(name);
+        let transactions = [];
+        if (wallet.addresses.length < 1) throw Error('No address associated with wallet');
+        for (let i in wallet.addresses) {
+            const txs = await getTransactions(wallet.addresses[i]);
+            transactions.push(txs);
+        }
+        return transactions;
+    } catch (error) {
+        throw Error(error.message)
     }
-    return transactions;
+}
+
+export async function getBalanceFromWallet(name) {
+    const wallet = getLocalWallet(name);
+    if (!wallet) throw Error()
+    if (wallet.addresses.length < 1) throw Error("No addresses associated with wallet");
+    const balance = await getBalance(wallet.addresses);
+    return balance;
 }
