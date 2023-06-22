@@ -1,16 +1,11 @@
-import { generateMnemonic as _generateMnemonic, mnemonicToSeedSync } from 'bip39';
 import { networks, payments } from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import { getTransactions, postWallet } from '../api/index.js';
 import { readData, writeData } from "../modules/storage.js";
 import getBalance from '../api/getBalance.js';
-
 const bip32 = BIP32Factory(ecc)
-
-function generateMnemonic() {
-    return _generateMnemonic();
-}
+import { generateMnemonic, mnemonicToSeedSync } from "./mnemonic.js";
 
 function deriveSeed(mnemonic) {
     return mnemonicToSeedSync(mnemonic);
