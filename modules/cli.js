@@ -17,7 +17,7 @@ export function initializeCli() {
         .command('generate <name> <count>')
         .description('Generate new addresses for the given wallet name')
         .action(async (name, count) => {
-            await addAddressesToWallet(name, count)
+            await addAddressesToWallet(name, +count)
         })
 
     program

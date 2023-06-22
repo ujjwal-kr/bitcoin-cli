@@ -2,7 +2,7 @@ import axios from "axios";
 
 export default async function getBalance(addrs) {
     let balance = 0;
-    const baseUrl = "https://api.blockcypher.com/v1/btc/main/addrs";
+    const baseUrl = "https://api.blockcypher.com/v1/btc/test3/addrs";
     for (let i in addrs) {
         const addressUrl = `${baseUrl}/${addrs[i]}/balance`;
         try {

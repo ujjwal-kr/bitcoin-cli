@@ -1,8 +1,8 @@
 import { generateMnemonic as _generateMnemonic, mnemonicToSeedSync } from 'bip39';
-import { networks } from 'bitcoinjs-lib';
+import { networks, payments } from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
-import { addAddresses, getTransactions, postWallet } from '../api/index.js';
+import { getTransactions, postWallet } from '../api/index.js';
 import { readData, writeData } from "../modules/storage.js";
 import getBalance from '../api/getBalance.js';
 
@@ -27,10 +27,13 @@ function deriveExtendedPublicKey(masterExtendedKey) {
     return masterNode.neutered().toBase58();
 }
 
+
 function deriveBIP44Address(extendedPublicKey, index) {
     const masterNode = bip32.fromBase58(extendedPublicKey);
-    const childNode = masterNode.derivePath(`m/44'/0'/0'/0/${index}`);
-    return childNode.address;
+    const network = networks.testnet;
+    const childNode = masterNode.derivePath(`m/44/0/0/0/${index}`);
+    const { address } = payments.p2pkh({ pubkey: childNode.publicKey, network });
+    return address;
 }
 
 function getLocalWallet(name) {
@@ -48,15 +51,15 @@ function updateLocalWallet(name, newWallet) {
     let found = false;
     for (let i in dbData) {
         if (dbData[i].name == name) {
-            dbData.splice(i, 1);
-            dbData.push(newWallet);
+            dbData.splice(i, 1, newWallet); 
             found = true;
+            break;
         }
     }
     if (found) {
-        writeData(dbData)
+        writeData(dbData);
     } else {
-        throw Error("Wallet not found by name: " + name);
+        throw new Error("Wallet not found by name: " + name);
     }
 }
 
@@ -75,7 +78,7 @@ function genKeysFromMnemonic(mnemonic) {
 
 export async function createWallet(name) {
     const mnemonic = generateMnemonic();
-    console.log("This is your mnemonic. Save it in a safe place to retrieve the wallet later: ", mnemonic);
+    console.log("This is your mnemonic. Save it in a safe place to retrieve the wallet later:\n", mnemonic);
     const wallet = genKeysFromMnemonic(mnemonic);
     const bCWallet = await postWallet(name, wallet);
     let dbData = readData()
@@ -100,23 +103,18 @@ export function listLocalWallets() {
     }
 }
 
-export async function addAddressesToWallet(name, numAddresses) {
-    try {
-        let wallet = getLocalWallet(name);
-        const addresses = [];
-        const extendedPublicKey = wallet.extendedPublicKey;
-        if (numAddresses <= 0 ) throw Error("Number of addresses cannot be negative or 0"); 
-        for (let i = 0; i < numAddresses; i++) {
-            const address = deriveBIP44Address(extendedPublicKey, i + wallet.latestIndex);
-            wallet.latestIndex += 1;
-            addresses.push(address);
-        }
-        wallet.addresses.push(...addresses);
-        await addAddresses(name, addresses);
-        updateLocalWallet(name, wallet);
-    } catch (error) {
-        throw Error(error.message);
+export function addAddressesToWallet(name, numAddresses) {
+    let wallet = getLocalWallet(name);
+    const addresses = [];
+    const extendedPublicKey = wallet.extended_public_key;
+    if (numAddresses <= 0) throw Error("Number of addresses cannot be negative or 0");
+    for (let i = 0 + wallet.latestIndex; i < numAddresses + wallet.latestIndex; i++) {
+        const address = deriveBIP44Address(extendedPublicKey, i);
+        addresses.push(address);
     }
+    wallet.latestIndex += numAddresses;
+    wallet.addresses.push(...addresses);
+    updateLocalWallet(name, wallet);
 }
 
 export async function getTransactionsFromWallet(name) {
