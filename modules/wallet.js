@@ -74,7 +74,9 @@ function genKeysFromMnemonic(mnemonic) {
 }
 
 export async function createWallet(name) {
-    const wallet = genKeysFromMnemonic(generateMnemonic());
+    const mnemonic = generateMnemonic();
+    console.log("This is your mnemonic. Save it in a safe place to retrieve the wallet later: ", mnemonic);
+    const wallet = genKeysFromMnemonic(mnemonic);
     const bCWallet = await postWallet(name, wallet);
     let dbData = readData()
     dbData.push(bCWallet)
@@ -106,6 +108,7 @@ export async function addAddressesToWallet(name, numAddresses) {
         if (numAddresses <= 0 ) throw Error("Number of addresses cannot be negative or 0"); 
         for (let i = 0; i < numAddresses; i++) {
             const address = deriveBIP44Address(extendedPublicKey, i + wallet.latestIndex);
+            wallet.latestIndex += 1;
             addresses.push(address);
         }
         wallet.addresses.push(...addresses);
