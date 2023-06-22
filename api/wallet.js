@@ -17,6 +17,7 @@ export async function postWallet(name, wallet) {
         return response.data;
     } catch (error) {
         console.error('Error importing wallet:', error.response.data);
+        throw Error()
     }
 }
 

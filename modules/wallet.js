@@ -46,7 +46,7 @@ function updateLocalWallet(name, newWallet) {
     let found = false;
     for (let i in dbData) {
         if (dbData[i].name == name) {
-            dbData.splice(i, 1, newWallet); 
+            dbData.splice(i, 1, newWallet);
             found = true;
             break;
         }
@@ -76,17 +76,26 @@ export async function createWallet(name) {
     console.log("This is your mnemonic. Save it in a safe place to retrieve the wallet later:\n", mnemonic);
     const wallet = genKeysFromMnemonic(mnemonic);
     const bCWallet = await postWallet(name, wallet);
-    let dbData = readData()
-    dbData.push(bCWallet)
-    writeData(dbData)
+    try {
+        let dbData = readData();
+        dbData.push(bCWallet);
+        writeData(dbData);
+    } catch {
+        throw Error("wallet exists")
+    }
 }
 
 export async function importWalletFromMnemonic(name, mnemonic) {
     const wallet = genKeysFromMnemonic(mnemonic)
     const bCWallet = await postWallet(name, wallet);
-    let dbData = readData();
-    dbData.push(bCWallet);
-    writeData(dbData);
+    try {
+        let dbData = readData();
+        dbData.push(bCWallet);
+        writeData(dbData);
+        return bCWallet;
+    } catch {
+        throw Error("Wallet exists")
+    }
 }
 
 export function listLocalWallets() {

@@ -10,22 +10,30 @@ export function initializeCli() {
         .command('create <name>')
         .description('Create a new wallet by name')
         .action(async (name) => {
-            await createWallet(name)
+            try {
+                await createWallet(name)
+            } catch (error) {
+                console.log(error)
+            }
         })
 
     program
         .command('generate <name> <count>')
         .description('Generate new addresses for the given wallet name')
         .action(async (name, count) => {
-            await addAddressesToWallet(name, +count)
+            addAddressesToWallet(name, +count)
         })
 
     program
         .command('import <name> <mnemonic>')
         .description('Import a wallet from menmonic(in double quotes) and assign the given name')
         .action(async (name, mnemonic) => {
-            await importWalletFromMnemonic(name, mnemonic);
-            console("Wallet imported");
+            try {
+                await importWalletFromMnemonic(name, mnemonic);
+                console.log("Wallet imported");
+            } catch (error) {
+                console.log(error.message);
+            }
         })
 
     program
